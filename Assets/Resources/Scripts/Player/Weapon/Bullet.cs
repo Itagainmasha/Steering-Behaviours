@@ -8,6 +8,8 @@ public class Bullet : MonoBehaviour
     [Header("Options")]
     [Tooltip("Скорость полёта пули")]
     [SerializeField] private float _speed = 1f; // Скорость полёта пули
+    [Tooltip("Урон от пули")]
+    [SerializeField] internal int damage = 1; 
     private Rigidbody2D _rig;
 
     /// <summary>
