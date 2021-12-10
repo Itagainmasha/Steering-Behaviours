@@ -60,8 +60,8 @@ public class Flair : Animal
         }
     }
 
-=
-    /// <param name="chase"></param>
+
+   
     protected void Chase(bool chase)
     {
         if (!chase) 
@@ -71,7 +71,7 @@ public class Flair : Animal
     }
 
 
-    /// <param name="running"></param>
+  
     protected void Running(bool running)
     {
         if (!running) 

@@ -6,7 +6,7 @@ public class Animal : MonoBehaviour
 {
     [Header("Components")]
     [Tooltip("Игровой менеджер, здесь хранится всё важное, он всего 1 на сцене")]
-    [SerializeField] internal GameManager gameManager;]
+    [SerializeField] internal GameManager gameManager;
 
     [Header("Animal: Options")]
     [Tooltip("Здоровье животного")]
@@ -41,11 +41,15 @@ public class Animal : MonoBehaviour
             for (int i = 0; i < gameManager.groupedAnimals.Count; i++) 
             {
                 GroupedAnimal groupedAnimal = gameManager.groupedAnimals[i]; 
-                if (groupedAnimal.groupID == thisGroupedAnimal.groupID && gameObject != groupedAnimal.gameObject) 
-                    _groupedAnimals[i] = groupedAnimal; 
+                if (groupedAnimal != null && groupedAnimal.groupID == thisGroupedAnimal.groupID && gameObject != groupedAnimal.gameObject)
+                    _groupedAnimals.Add(groupedAnimal);
             }
-            int rand = Random.Range(0, _groupedAnimals.Count - 1); 
-            _groupedAnimals[rand]._mainAnimal = true; 
+            if (_groupedAnimals.Count > 0)
+            {
+                int rand = Random.Range(0, _groupedAnimals.Count - 1);
+                if (_groupedAnimals[rand] != null)
+                    _groupedAnimals[rand]._mainAnimal = true;
+            }
         }
     }
 

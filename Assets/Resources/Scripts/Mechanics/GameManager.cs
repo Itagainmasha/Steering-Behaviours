@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,7 +21,33 @@ public class GameManager : MonoBehaviour
     [Tooltip("Лист (массив) всех живых существ, которые могут группироваться")]
     [SerializeField] internal List<GroupedAnimal> groupedAnimals;
     [Tooltip("Массив точек пути на сцене")]
-    [SerializeField] private Transform[] _wayPoints; 
+    [SerializeField] private Transform[] _wayPoints;
+
+    [Header("UI")]
+    #region TextsForSliders
+    [Tooltip("Текст, который показывает какое количество пуль выбрал игрок, передвигая слайдер _sliderCountBullets")]
+    [SerializeField] private Text _textCountBullets; 
+    [Tooltip("Текст, который показывает какое количество волков выбрал игрок, передвигая слайдер _sliderCountWolfs")]
+    [SerializeField] private Text _textCountWolfs; 
+    [Tooltip("Текст, который показывает какое количество групп ланей выбрал игрок, передвигая слайдер _sliderCountGroupsDoes")]
+    [SerializeField] private Text _textCountGroupsDoes; 
+    [Tooltip("Текст, который показывает какое количество зайцев выбрал игрок, передвигая слайдер _sliderCountRabbits")]
+    [SerializeField] private Text _textCountRabbits; 
+    #endregion
+
+    #region Sliders
+    [Tooltip("Слайдер, устанавливающий количество патронов игрока")]
+    [SerializeField] private Slider _sliderCountBullets; 
+    [Tooltip("Слайдер, устанавливающий количество генерируемых волков")]
+    [SerializeField] private Slider _sliderCountWolfs; 
+    [Tooltip("Слайдер, устанавливающий количество генерируемых ланей")]
+    [SerializeField] private Slider _sliderCountGroupsDoes; 
+    [Tooltip("Слайдер, устанавливающий количество генерируемых зайцев")]
+    [SerializeField] private Slider _sliderCountRabbits; 
+    #endregion
+
+    [Tooltip("Меню настроек генерации")]
+    [SerializeField] private GameObject _menuSettings;
 
     [Header("Options")]
     [Tooltip("В этом объекте будут находится все животные, как дочерние")]
@@ -33,33 +61,63 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private List<Vector2> _busyVectors; 
 
-    private void Awake()
+    private void Awake() => GeneratePlayer();
+
+    private void Update()
     {
-        GeneratePlayer();
-        GenerateAnimals(_countWolfs, _wolfPrefab);
+        if (Input.GetKeyDown(KeyCode.R)) 
+            RestartLevel(); 
+        SlidersValueGet(); 
+    }
+
+    private void RestartLevel() => SceneManager.LoadScene(0);
+
+    private void SlidersValueGet()
+    {
+        _textCountBullets.text = _sliderCountBullets.value.ToString(); 
+        _textCountWolfs.text = _sliderCountWolfs.value.ToString(); 
+        _textCountGroupsDoes.text = _sliderCountGroupsDoes.value.ToString(); 
+        _textCountRabbits.text = _sliderCountRabbits.value.ToString(); 
+    }
+
+    public void ApplyGenerationSettings()
+    {
+        GameObject.FindWithTag("Player").GetComponent<Weapon>().bulletCount = (int)_sliderCountBullets.value; 
+        _countWolfs = (int)_sliderCountWolfs.value; 
+        _countGroupsDoes = (int)_sliderCountGroupsDoes.value; 
+        _countRabbits = (int)_sliderCountRabbits.value; 
+        _menuSettings.SetActive(false); 
+
+        Generate(); 
+    }
+
+    private void Generate()
+    {
+        GenerateAnimals(_countWolfs, _wolfPrefab); 
         for (int i = 0; i < _countGroupsDoes; i++)
-            GenerateAnimals(Random.Range(3, 10), _doePrefab, i); 
+            GenerateAnimals(Random.Range(4, 10), _doePrefab, i); 
         GenerateAnimals(_countRabbits, _rabbitPrefab); 
+        _busyVectors.Clear(); 
     }
 
     private void GeneratePlayer()
     {
-        Vector2 pos = GeneratePosition(); 
-        _busyVectors.Add(pos); 
-        GameObject player = Instantiate(_playerPrefab, pos, Quaternion.identity, _spawnTransform); 
+        Vector2 generatedPos = GeneratePosition();
+        Vector3 pos = new Vector3(x: generatedPos.x, y: generatedPos.y, z: -30f); 
+        _busyVectors.Add(generatedPos); 
+        GameObject player = Instantiate(_playerPrefab, pos, Quaternion.identity); 
         alives.Add(player.transform); 
-        _busyVectors.Clear(); 
     }
 
-    /// <param name="count"></param>
-    /// <param name="prefab"></param>
+
     private void GenerateAnimals(int count, GameObject prefab)
     {
         for (int i = 0; i < count; i++)
         {
-            Vector2 pos = GeneratePosition(); 
-            _busyVectors.Add(pos); 
-            GameObject animal = Instantiate(prefab, pos, Quaternion.identity, _spawnTransform); 
+            Vector2 generatedPos = GeneratePosition();
+            Vector3 pos = new Vector3(x: generatedPos.x, y: generatedPos.y, z: -30f);
+            _busyVectors.Add(generatedPos); 
+            GameObject animal = Instantiate(prefab, pos, Quaternion.identity); 
             animal.name = prefab.name; 
             alives.Add(animal.transform); 
             PatrolAnimal patrolAnimal = animal.GetComponent<PatrolAnimal>(); 
@@ -68,15 +126,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <param name="count"></param>
-    /// <param name="prefab"></param>
-    /// <param name="group"></param>
     private void GenerateAnimals(int count, GameObject prefab, int group)
     {
-        Vector2 pos = GeneratePosition(); 
-        _busyVectors.Add(pos); 
+        Vector2 generatedPos = GeneratePosition();
+        Vector3 pos = new Vector3(x: generatedPos.x, y: generatedPos.y, z: -30f);
+        _busyVectors.Add(generatedPos); 
         Transform mainAnimal = null; 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < count-1; i++)
         {
             GameObject animal = Instantiate(prefab, pos, Quaternion.identity, _spawnTransform);
             animal.name = prefab.name; 
@@ -98,7 +154,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <returns></returns>
+  
     private Vector2 GeneratePosition()
     {
         Vector2 pos = new Vector2(x: Random.Range(22, 34), y: Random.Range(-12.5f, -7.5f)); 

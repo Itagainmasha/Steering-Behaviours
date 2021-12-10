@@ -15,14 +15,14 @@ public class Weapon : MonoBehaviour
 
     [Header("Options")]
     [Tooltip("Количество патронов")]
-    [SerializeField] private int _bulletCount = 10; // Количество патронов
+    [SerializeField] internal int bulletCount = 10; // Количество патронов
 
     /// <summary>
     /// Метод вызывается каждый кадр
     /// </summary>
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && _bulletCount > 0) // Проверка, нажалась ли левая кнопка мыши, а также есть ли патроны в оружии
+        if (Input.GetKeyDown(KeyCode.Space) && bulletCount > 0) // Проверка, нажалась ли левая кнопка мыши, а также есть ли патроны в оружии
             Shoot(); // Выстрел
     }
 
@@ -32,6 +32,6 @@ public class Weapon : MonoBehaviour
     private void Shoot()
     {
         Instantiate(_bullet, _shotPos.position, transform.rotation); // Спавн пули в дочернем объекте ShotPos у игрока
-        _bulletCount--; // Уменьшение количества патронов на 1
+        bulletCount--; // Уменьшение количества патронов на 1
     }
 }
